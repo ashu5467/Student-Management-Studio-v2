@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "gapi-script": "^1.2.0",
+    "googleapis": "^142.0.0"
+    "proxy": "http://localhost:3001"
+
+  }
+}
