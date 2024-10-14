@@ -195,7 +195,7 @@ const handleAddInfo = () => {
       'Group Photo ID': student.groupPhotoId,
     }));
 
-    fetch(`http://192.168.1.108:3001/update/${encodeURIComponent(fileName)}`, {
+    fetch(`http://localhost:3001/update/${encodeURIComponent(fileName)}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

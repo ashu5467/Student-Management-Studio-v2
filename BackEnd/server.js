@@ -9,10 +9,12 @@ const cors = require('cors');
 const socketIo = require('socket.io'); // Import socket.io
 const sharp = require('sharp'); // For image manipulation
 const bodyParser = require('body-parser');
+const paths = require('./Paths'); 
 
 const app = express();
 const server = http.createServer(app); // Create an HTTP server
 const io = socketIo(server); // Attach socket.io to the server
+
 
 app.options('*', cors()); // Pre-flight requests for all routes
 
@@ -55,8 +57,8 @@ app.use(express.json());
 
 console.log('Middleware configured and server is ready to receive requests.');
 
-const IMAGES_DIR = `/home/vishal/Desktop/School_Studio_imgs/1/Group_Photos/Cam1`;
-const GROUP_PHOTOS_DIR = path.join(IMAGES_DIR, 'Group Photos');
+const IMAGES_DIR = paths.IMAGES_DIR;
+const GROUP_PHOTOS_DIR = paths.GROUP_PHOTOS_DIR
 
 // Helper function to search for the image in the specific folder
 function findImage(cameraId, photoId) {
@@ -169,7 +171,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
   console.log(`File uploaded: ${file.originalname}`);
 
   const fileName = file.originalname;
-  const filePath = path.join('/home/vishal/Desktop/student management studio docs', fileName);
+  const filePath = path.join(paths.UPLOAD_PATH, fileName);
 
   // Move the file to the desired location with the original name
   fs.rename(file.path, filePath, (err) => {
@@ -183,11 +185,11 @@ app.post('/upload', upload.single('file'), (req, res) => {
 });
 
 
-const INSIDE_PSD_PATH = '/home/vishal/Desktop/School_Studio_imgs/1/Magazine/Templates/Inside sheet.psd';
-const OUTSIDE_PSD_PATH = '/home/vishal/Desktop/School_Studio_imgs/1/Magazine/Templates/Outside sheet.psd';
-const GROUP_PHOTO_PATH = '/home/vishal/Desktop/School_Studio_imgs/1/Group_Photos/Cam1';
-const INDIVIDUAL_PHOTO_PATH = '/home/vishal/Desktop/School_Studio_imgs/1/Individual_Photos/Cam1';
-const SAVE_PATH = '/home/vishal/Desktop/School_Studio_imgs/1/Magazine/Individual_Magazines';
+const INSIDE_PSD_PATH = paths.INSIDE_PSD_PATH;
+const OUTSIDE_PSD_PATH = paths.OUTSIDE_PSD_PATH;
+const GROUP_PHOTO_PATH = paths.GROUP_PHOTOS_DIR;
+const INDIVIDUAL_PHOTO_PATH = paths.INDIVIDUAL_PHOTO_PATH;
+const SAVE_PATH = paths.SAVE_PATH;
 
 // Utility function to check if file exists
 const fileExists = (filePath) => {

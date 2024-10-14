@@ -8,15 +8,17 @@ const { exec } = require('child_process');
 const { PDFDocument,StandardFonts, rgb ,degrees} = require('pdf-lib');
 const XLSX = require('xlsx');
 const sharp = require('sharp');
+const pathConfig = require('./Paths');
+const paths = require('./Paths'); 
 
 
 const app = express();
 const PORT = 5000;
 
 // Directories
-const imagesDirectory = path.join('/home/vishal/Desktop/School_Studio_imgs/1/Group_Photos/Cam1');
-const documentsDirectory = path.join('/home/vishal/Desktop/School_Studio_imgs/1/Group_Photos/Group_Photo_Documents');
-const updateDocsDirectory = path.join('/home/vishal/Desktop/student management studio docs');
+const imagesDirectory = pathConfig.imagesDirectory;
+const documentsDirectory = pathConfig.documentsDirectory;
+const updateDocsDirectory = pathConfig.updateDocsDirectory;
 
 
 // Ensure the documents directory exists
@@ -90,6 +92,7 @@ app.post('/create-excel/:imageName', async (req, res) => {
 
   const excelFileName = `Students_Excel_sheet_for_Magazine.xlsx`; // Use a fixed filename
   const excelFilePath = path.join(updateDocsDirectory, excelFileName); // Save at the specified directory
+
 
   const possibleExtensions = ['jpg', 'jpeg', 'png', 'JPG', 'JPEG', 'PNG'];
 
@@ -191,7 +194,7 @@ app.post('/create-excel/:imageName', async (req, res) => {
     const studentPhotoName = [];
     // Check for each possible extension for individual photos
     for (const ext of imageExtensions) {
-      const tempPath = path.join('/home/vishal/Desktop/School_Studio_imgs/1/Individual_Photos/Cam1', `${student.individualPhotoId}.${ext}`);
+      const tempPath = path.join(pathConfig.individualPhotosDirectory, `${student.individualPhotoId}.${ext}`);
       if (fs.existsSync(tempPath)) {
         individualPhotoPath = tempPath;
         individualImageFound = true;
@@ -257,10 +260,10 @@ app.post('/create-magazine', async (req, res) => {
   const excelFilePath = path.join(updateDocsDirectory, 'Students_Excel_sheet_for_Magazine.xlsx');
   const excelFileName = `Students_Excel_sheet_for_Magazine.xlsx`; // Use a fixed filename
   
-  const insidePsdPath = `/home/vishal/Desktop/School_Studio_imgs/1/Magazine/Templates/Inside_sheet.psd`;
-  const outsidePsdPath = `/home/vishal/Desktop/School_Studio_imgs/1/Magazine/Templates/Outside_sheet.PSD`;
-  const outputPdfPath = `/home/vishal/Desktop/School_Studio_imgs/1/Magazine/Templates/output.pdf`;
-  const finalPdfDirectory = `/home/vishal/Desktop/School_Studio_imgs/1/Magazine/Individual_Magazines/`;
+  const insidePsdPath = pathConfig.insidePsdPath;
+  const outsidePsdPath = pathConfig.outsidePsdPath;
+  const outputPdfPath = pathConfig.outputPdfPath;
+  const finalPdfDirectory = pathConfig.finalPdfDirectory;
   const sheetName = `1_${board}_${className}_${section}`;
 
 
@@ -304,7 +307,7 @@ console.log(GroupPhotoPath,'>>>>')
       // Find the group photo in the specified directory
       //const groupPhotoPath = findPhotoByName(`/home/vishal/Desktop/School_Studio_imgs/1/Group_Photos/Cam1/`, groupPhotoName);
       const groupPhotoPath = groupPhotoName;
-      console.log(`Searching for group photo in: /home/vishal/Desktop/School_Studio_imgs/1/Group_Photos/Cam1/`);
+      console.log(`Searching for group photo in: ${imagesDirectory}`);
       
       if (!groupPhotoPath) {
           console.error(`Group photo "${groupPhotoName}" not found.`);
@@ -360,17 +363,22 @@ console.log(GroupPhotoPath,'>>>>')
           const insidePsd = PSD.fromFile(insidePsdPath);
           insidePsd.parse();
           await replaceImageInPSD(insidePsd, groupPhotoPath, 'Group Layer Name');
-          await insidePsd.image.saveAsPng('/home/vishal/Desktop/inside_modified.png');
+
+          const outputPath1 = path.join(pathConfig.BASE, 'inside_modified.png');
+
+          await insidePsd.image.saveAsPng(outputPath1);
 
           const outsidePsd = PSD.fromFile(outsidePsdPath);
           outsidePsd.parse();
           await replaceImageInPSD(outsidePsd, individualPhotoPath, 'Individual Layer Name');
-          await outsidePsd.image.saveAsPng('/home/vishal/Desktop/outside_modified.png');
+
+          const outputPath2 = path.join(pathConfig.BASE,'outside_modified.png')
+          await outsidePsd.image.saveAsPng(outputPath2);
 
           // Convert to PDF and insert photos
           const convertCommand = `convert /home/vishal/Desktop/inside_modified.png /home/vishal/Desktop/outside_modified.png ${outputPdfPath}`;
           await new Promise((resolve, reject) => {
-              exec(convertCommand, (err, stdout, stderr) => {
+              exec(convertCommand, (err, stdout, stderr) => { 
                   if (err) {
                       console.error('Error during PDF conversion:', stderr);
                       reject(err);
