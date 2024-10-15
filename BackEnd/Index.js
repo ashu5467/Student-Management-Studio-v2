@@ -33,11 +33,11 @@ if (!fs.existsSync(documentsDirectory)) {
 // }));
 
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'], // Allow both frontend URLs
+    origin: ['http://localhost:3000', 'http://localhost:3001','http://192.168.1.7:3000'], // Allow both frontend URLs
   }));
 
 // Serve static files (e.g., images) from the specific folder
-console.log(`Images Directory set to: ${imagesDirectory}`);
+
 app.use('/images', express.static(imagesDirectory));
 
 app.use(express.json());
@@ -77,7 +77,7 @@ app.get('/check-image/:imageName', (req, res) => {
   }
 });
 
-// API route to create an Excel sheet with the image
+
 // API route to create a new sheet in an existing Excel file
 app.post('/create-excel/:imageName', async (req, res) => {
   const imageName = req.params.imageName;
