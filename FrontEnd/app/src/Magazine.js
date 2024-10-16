@@ -7,6 +7,7 @@ const Magazine = () => {
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedBoard, setSelectedBoard] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
+  const [selectedSchool, setSelectedSchool] = useState('');
 
   const [excelData, setExcelData] = useState(null);
   const [error, setError] = useState('');
@@ -53,6 +54,7 @@ const Magazine = () => {
           board: selectedBoard,
           className: selectedClass,
           section: selectedSection,
+          SchoolNumber:selectedSchool,
           // individualPhotoId: student['Individual Photo ID'],
           //groupPhotoId: student['Group Photo ID']
           groupPhotoId: "Picture 1",
@@ -88,17 +90,20 @@ const Magazine = () => {
         className="block w-full text-sm text-gray-500 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 mb-4 p-2"
       />
 
-      {/* Class Input */}
+
+
+      {/* School Number Input */}
       <div>
-        <label className="block mb-2">Enter Class:</label>
+        <label className="block mb-2">Enter School Number:</label>
         <input
-          id="class-input"
+          id="school-input"
           type="text"
-          value={selectedClass}
-          onChange={(e) => setSelectedClass(e.target.value)}
-          className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          value={selectedSchool}
+          onChange={(e) => setSelectedSchool(e.target.value)}
+          className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
+      
 
       {/* Board Input */}
       <div>
@@ -108,9 +113,23 @@ const Magazine = () => {
           type="text"
           value={selectedBoard}
           onChange={(e) => setSelectedBoard(e.target.value)}
-          className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
+
+      {/* Class Input */}
+      <div>
+        <label className="block mb-2">Enter Class:</label>
+        <input
+          id="class-input"
+          type="text"
+          value={selectedClass}
+          onChange={(e) => setSelectedClass(e.target.value)}
+          className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+      </div>
+
+      
 
 
       {/* Section Input */}
@@ -121,7 +140,7 @@ const Magazine = () => {
           type="text"
           value={selectedSection}
           onChange={(e) => setSelectedSection(e.target.value)}
-          className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
 

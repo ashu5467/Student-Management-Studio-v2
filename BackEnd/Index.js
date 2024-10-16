@@ -1,3 +1,5 @@
+//15 oct
+
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
@@ -10,6 +12,8 @@ const XLSX = require('xlsx');
 const sharp = require('sharp');
 const pathConfig = require('./Paths');
 const paths = require('./Paths'); 
+
+const folderNames = ['1', '2', '3', '4'];
 
 
 const app = express();
@@ -27,10 +31,7 @@ if (!fs.existsSync(documentsDirectory)) {
   fs.mkdirSync(documentsDirectory, { recursive: true });
 }
 
-// Enable CORS for all requests
-// app.use(cors({
-//   origin: 'http://localhost:3000'
-// }));
+
 
 app.use(cors({
     origin: ['http://localhost:3000', 'http://localhost:3001','http://192.168.1.7:3000'], // Allow both frontend URLs
@@ -81,7 +82,7 @@ app.get('/check-image/:imageName', (req, res) => {
 // API route to create a new sheet in an existing Excel file
 app.post('/create-excel/:imageName', async (req, res) => {
   const imageName = req.params.imageName;
-  const { board, classname, section, studentData } = req.body; // Added studentData
+  const { board, classname, section, studentData ,schoolNumber,cameraId} = req.body; // Added studentData
 
   console.log('Received request body:', req.body);
 
@@ -100,8 +101,11 @@ app.post('/create-excel/:imageName', async (req, res) => {
   let imageFound = false;
 
   // Check if image exists with any of the possible extensions
+  let newImageDirectory = imagesDirectory.replace('schoolNum',schoolNumber)
+  console.log('newImageDirectory>>>>>',newImageDirectory)
   for (const ext of possibleExtensions) {
-    const tempImagePath = path.join(imagesDirectory, `${imageName}.${ext}`);
+    const tempImagePath = path.join(newImageDirectory+cameraId, `${imageName}.${ext}`);
+    console.log("tampimagepath>>>>>",tempImagePath)
     if (fs.existsSync(tempImagePath)) {
       imagePath = tempImagePath;
       imageFound = true;
@@ -132,7 +136,7 @@ app.post('/create-excel/:imageName', async (req, res) => {
   }
 
   // Define a new sheet name based on the request data (board, class, section)
-  const sheetName = `1_${board}_${classname}_${section}`;
+  const sheetName = `${schoolNumber}_${board}_${classname}_${section}`;
 
   // Check if a sheet with the same name already exists
   const existingSheet = workbook.getWorksheet(sheetName);
@@ -193,8 +197,11 @@ app.post('/create-excel/:imageName', async (req, res) => {
 
     const studentPhotoName = [];
     // Check for each possible extension for individual photos
+    let newIndividualPhotosDirectory = pathConfig.individualPhotosDirectory.replace('schoolNum',schoolNumber)
+    console.log('newIndividualPhotosDirectory>>>',newIndividualPhotosDirectory)
     for (const ext of imageExtensions) {
-      const tempPath = path.join(pathConfig.individualPhotosDirectory, `${student.individualPhotoId}.${ext}`);
+      const tempPath = path.join(newIndividualPhotosDirectory+cameraId, `${student.individualPhotoId}.${ext}`);
+      console.log('temppath>>>>',tempPath)
       if (fs.existsSync(tempPath)) {
         individualPhotoPath = tempPath;
         individualImageFound = true;
@@ -256,7 +263,7 @@ function findPhotoWithExtension(photoBasePath) {
   return null;
 }
 app.post('/create-magazine', async (req, res) => {
-  const { board, className, section } = req.body;
+  const { SchoolNumber,board, className, section } = req.body;
   const excelFilePath = path.join(updateDocsDirectory, 'Students_Excel_sheet_for_Magazine.xlsx');
   const excelFileName = `Students_Excel_sheet_for_Magazine.xlsx`; // Use a fixed filename
   
@@ -305,20 +312,22 @@ console.log(GroupPhotoPath,'>>>>')
       }
 
       // Find the group photo in the specified directory
-      //const groupPhotoPath = findPhotoByName(`/home/vishal/Desktop/School_Studio_imgs/1/Group_Photos/Cam1/`, groupPhotoName);
+      
       const groupPhotoPath = groupPhotoName;
       console.log(`Searching for group photo in: ${imagesDirectory}`);
       
       if (!groupPhotoPath) {
+
+
           console.error(`Group photo "${groupPhotoName}" not found.`);
           return res.status(404).json({ message: 'Group photo not found' });
       } else {
           console.log(`Group photo found at: ${groupPhotoPath}`);
       }
 
-      // Extract row details (I2:J8)
+      // Extract row details (I2:J7)
       const rowDetails = {};
-      for (let rowNum = 2; rowNum <= 8; rowNum++) {
+      for (let rowNum = 2; rowNum <= 7; rowNum++) {
           const detailKey = worksheet.getCell(`I${rowNum}`).value;
           const detailValue = worksheet.getCell(`J${rowNum}`).value;
 
@@ -354,13 +363,16 @@ console.log(GroupPhotoPath,'>>>>')
           
           const individualPhotoPath = studentdata[0];
           const IndividualStudentName = studentdata[1];
-          //const individualPhotoPath = findPhotoWithExtension(`/home/vishal/Desktop/School_Studio_imgs/1/Individual_Photos/Cam1/${student.individualPhotoId}`);
           
           
-          const finalPdfPath = path.join(finalPdfDirectory, `${IndividualStudentName}_${className}_${section}.pdf`);
+          let newFinalPdfDirectory = finalPdfDirectory.replace('schoolNum',SchoolNumber)
+          console.log('newFinalPdfDirectory>>>>>',newFinalPdfDirectory)
+          const finalPdfPath = path.join(newFinalPdfDirectory, `${SchoolNumber}_${IndividualStudentName}_${className}_${section}.pdf`);
 
           // Modify the Inside and Outside PSD with the student and group photos
-          const insidePsd = PSD.fromFile(insidePsdPath);
+          let newInsidePsdPath = insidePsdPath.replace('schoolNum',SchoolNumber)
+          console.log('newInsidePsdPath>>>',newInsidePsdPath)
+          const insidePsd = PSD.fromFile(newInsidePsdPath);
           insidePsd.parse();
           await replaceImageInPSD(insidePsd, groupPhotoPath, 'Group Layer Name');
 
@@ -368,15 +380,21 @@ console.log(GroupPhotoPath,'>>>>')
 
           await insidePsd.image.saveAsPng(outputPath1);
 
-          const outsidePsd = PSD.fromFile(outsidePsdPath);
+          let newImageOutsidePsdPath = outsidePsdPath.replace('schoolNum',SchoolNumber)
+          console.log('newImageOutsidePsdPath>>>',newImageOutsidePsdPath)
+          const outsidePsd = PSD.fromFile(newImageOutsidePsdPath);
           outsidePsd.parse();
           await replaceImageInPSD(outsidePsd, individualPhotoPath, 'Individual Layer Name');
 
           const outputPath2 = path.join(pathConfig.BASE,'outside_modified.png')
           await outsidePsd.image.saveAsPng(outputPath2);
 
+
+          let newOutputpdfPath = outputPdfPath.replace('schoolNum',SchoolNumber)
+          console.log('newOutputpdfPath391>>>',newOutputpdfPath)
+
           // Convert to PDF and insert photos
-          const convertCommand = `convert /home/vishal/Desktop/inside_modified.png /home/vishal/Desktop/outside_modified.png ${outputPdfPath}`;
+          const convertCommand = `convert /home/vishal/Desktop/inside_modified.png /home/vishal/Desktop/outside_modified.png ${newOutputpdfPath}`;
           await new Promise((resolve, reject) => {
               exec(convertCommand, (err, stdout, stderr) => { 
                   if (err) {
@@ -392,7 +410,9 @@ console.log(GroupPhotoPath,'>>>>')
          
 
           // Add student data, images, and row details to the PDF
-          await addPhotosToPdf(outputPdfPath, groupPhotoPath, individualPhotoPath, finalPdfPath, IndividualStudentName, className, section, rowDetails);
+          let newOutputPdfPath = outputPdfPath.replace('schoolNum',SchoolNumber)
+          console.log('newnewOutputPdfPath>>>407',newOutputPdfPath);
+          await addPhotosToPdf(newOutputPdfPath, groupPhotoPath, individualPhotoPath, finalPdfPath, IndividualStudentName, className, section, rowDetails);
       }
       z++;
     }
@@ -408,10 +428,15 @@ console.log(GroupPhotoPath,'>>>>')
 
 
 // Function to add photos, text, and row details to the PDF
-async function addPhotosToPdf(outputPdfPath, groupPhotoPath, individualPhotoPath, finalPdfPath, name, className, section, rowDetails) {
+async function addPhotosToPdf(outputPdfPath, groupPhotoPath, individualPhotoPath, finalPdfPath, name, className, section, rowDetails,SchoolNumber) {
   try {
+
+
+
       console.log(`Loading PDF from path: ${outputPdfPath}`);
-      const pdfDoc = await PDFDocument.load(fs.readFileSync(outputPdfPath));
+      let newOutputPdfPath = outputPdfPath.replace('schoolNum',SchoolNumber)
+          console.log('newOutputPdfPath>>>',newOutputPdfPath)
+      const pdfDoc = await PDFDocument.load(fs.readFileSync(newOutputPdfPath));
       
       // Embed the images
       console.log(`Embedding group photo from path: ${groupPhotoPath}`);
@@ -491,6 +516,9 @@ async function addPhotosToPdf(outputPdfPath, groupPhotoPath, individualPhotoPath
           //currentY -= lineSpacing;
           currentX += lineSpacing  // Adjust Y position for the next detail
       }
+
+      console.log('Attempting to read image from:', groupPhotoPath);
+
 
       // Save the modified PDF
       console.log(`Saving the final PDF to path: ${finalPdfPath}`);
@@ -582,11 +610,6 @@ async function getColumnZValues(filePath, sheetName) {
   return columnZValues;
 }
 
-
-
-
-
-
-app.listen(PORT, () => {
+app.listen(PORT,'0.0.0.0', () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

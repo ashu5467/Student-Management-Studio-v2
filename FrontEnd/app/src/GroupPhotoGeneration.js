@@ -20,6 +20,7 @@ const GroupPhotoGeneration = () => {
   const [isPhotoVisible, setIsPhotoVisible] = useState(false); 
   const [studentData, setStudentData] = useState([]);
   const [excelData, setExcelData] = useState([]);
+  const [schoolNumber, setSchoolNumber] = useState('');
 
   const handleSearch = async () => {
     try {
@@ -42,7 +43,9 @@ const GroupPhotoGeneration = () => {
       const classname = selectedClass;
       const section = selectedSection;
       const groupPhoto = selectedGroupPhotoId;
-  
+      const cameraId = selectedGroupCameraId;
+   
+   console.log("cameraid>>>>",cameraId)
       const response = await axios.post(
         `http://localhost:5000/create-excel/${imageName}`,
         {
@@ -50,7 +53,9 @@ const GroupPhotoGeneration = () => {
           classname: classname,
           section: section,
           groupPhoto: groupPhoto,
-          studentData: studentData
+          studentData: studentData,
+          cameraId: cameraId,
+          schoolNumber: schoolNumber,
         },
         {
           headers: {
@@ -164,21 +169,23 @@ const GroupPhotoGeneration = () => {
       <h3 className="text-xl font-semibold">Upload Students Data Excel sheet and Select Details</h3>
       <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} className="block w-full text-sm text-gray-500 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 mb-4 p-2" />
 
-      <div>
-        <label className="block mb-2">Select Class:</label>
-        <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)} className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          <option value="">Select Class</option>
-          {classOptions.map((cls, index) => (
-            <option key={index} value={cls}>
-              {cls}
-            </option>
-          ))}
-        </select>
+
+
+       {/* New School Number Section */}
+       <div>
+        <label className="block mb-2">Enter School Number:</label>
+        <input
+          type="text"
+          value={schoolNumber}
+          onChange={(e) => setSchoolNumber(e.target.value)}
+          className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder="Enter School Number"
+        />
       </div>
 
       <div>
         <label className="block mb-2">Select Board:</label>
-        <select value={selectedBoard} onChange={(e) => setSelectedBoard(e.target.value)} className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <select value={selectedBoard} onChange={(e) => setSelectedBoard(e.target.value)} className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400">
           <option value="">Select Board</option>
           {boardOptions.map((board, index) => (
             <option key={index} value={board}>
@@ -188,9 +195,24 @@ const GroupPhotoGeneration = () => {
         </select>
       </div>
 
+
+      <div>
+        <label className="block mb-2">Select Class:</label>
+        <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)} className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400">
+          <option value="">Select Class</option>
+          {classOptions.map((cls, index) => (
+            <option key={index} value={cls}>
+              {cls}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      
+
       <div>
         <label className="block mb-2">Select Section:</label>
-        <select value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <select value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400">
           <option value="">Select Section</option>
           {sectionOptions.map((section, index) => (
             <option key={index} value={section}>
@@ -202,7 +224,7 @@ const GroupPhotoGeneration = () => {
 
       {/* <div>
         <label className="block mb-2">Select Group Camera ID:</label>
-        <select value={selectedGroupCameraId} onChange={(e) => setSelectedGroupCameraId(e.target.value)} className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <select value={selectedGroupCameraId} onChange={(e) => setSelectedGroupCameraId(e.target.value)} className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400">
           <option value="">Select Group Camera ID</option>
           {groupCameraIdOptions.map((cameraId, index) => (
             <option key={index} value={cameraId}>
@@ -219,7 +241,7 @@ const GroupPhotoGeneration = () => {
     type="text"
     value={selectedGroupCameraId}
     onChange={(e) => setSelectedGroupCameraId(e.target.value)}
-    className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
     placeholder="Enter Group Camera ID"
   />
 </div>
@@ -227,7 +249,7 @@ const GroupPhotoGeneration = () => {
 
       {/* <div>
         <label className="block mb-2">Select Group Photo ID:</label>
-        <select value={selectedGroupPhotoId} onChange={handleGroupPhotoIdChange} className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <select value={selectedGroupPhotoId} onChange={handleGroupPhotoIdChange} className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400">
           <option value="">Select Group Photo ID</option>
           {groupPhotoIdOptions.map((photoId, index) => (
             <option key={index} value={photoId}>
@@ -244,7 +266,7 @@ const GroupPhotoGeneration = () => {
     type="text"
     value={selectedGroupPhotoId}
     onChange={handleGroupPhotoIdChange}  // This function remains the same
-    className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
     placeholder="Enter Group Photo ID"
   />
 </div>

@@ -70,18 +70,7 @@ function findImage(cameraId, photoId) {
   return fs.existsSync(imagePath) ? imagePath : null;
 }
 
-// New route to check if the photo exists
-// app.post('/check-photo', (req, res) => {
-//   const { photoId, folderPath } = req.body;
-//   const photoPath = path.join(folderPath, `${photoId}.jpeg`);
 
-//   fs.access(photoPath, fs.constants.F_OK, (err) => {
-//     if (err) {
-//       return res.json({ exists: false });
-//     }
-//     res.json({ exists: true });
-//   });
-// });
 
 app.post('/check-photo', (req, res) => {
   const { photoId, folderPath } = req.body;
@@ -368,6 +357,6 @@ app.post('/update/:fileName', upload.none(), (req, res) => {
 
 // Start the server 
 const PORT = 3001;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0',() => {
   console.log(`Server is running on port ${PORT}`);
 });

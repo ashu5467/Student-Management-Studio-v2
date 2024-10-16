@@ -129,7 +129,7 @@ const handleSubmit = (e) => {
 };
 
 
-  // Handle adding the Individual Photo ID
+ 
   // Handle adding the Individual Photo ID
 const handleAddInfo = () => {
   if (!photoId || !selectedStudent) {
@@ -225,24 +225,6 @@ const handleAddInfo = () => {
       />
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Class Dropdown */}
-        <div>
-          <label htmlFor="classDropdown" className="block text-sm md:text-base lg:text-lg font-medium mb-2">
-            Class
-          </label>
-          <select
-            id="classDropdown"
-            name="classDropdown"
-            value={formData.classDropdown}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            <option value="">Select a class</option>
-            {classes.map((cls, index) => (
-              <option key={index} value={cls}>{cls}</option>
-            ))}
-          </select>
-        </div>
 
         {/* Board Dropdown */}
         <div>
@@ -262,6 +244,29 @@ const handleAddInfo = () => {
             ))}
           </select>
         </div>
+
+
+
+        {/* Class Dropdown */}
+        <div>
+          <label htmlFor="classDropdown" className="block text-sm md:text-base lg:text-lg font-medium mb-2">
+            Class
+          </label>
+          <select
+            id="classDropdown"
+            name="classDropdown"
+            value={formData.classDropdown}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+          >
+            <option value="">Select a class</option>
+            {classes.map((cls, index) => (
+              <option key={index} value={cls}>{cls}</option>
+            ))}
+          </select>
+        </div>
+
+        
 
         {/* Section Dropdown */}
         <div>
@@ -382,21 +387,10 @@ const handleAddInfo = () => {
         </div>
       )}
 
-      {/* {studentData && (
-        <div className="mt-8">
-          <h3 className="text-lg md:text-xl lg:text-2xl font-bold mb-4">Student Data</h3>
-          <p>Name: {studentData.studentName}</p>
-          <p>Individual Photo ID: {studentData.photo || 'Not Added'}</p>
-        </div>
-      )} */}
+      
 
-      {/* Save to file button */}
-      {/* <button
-        onClick={handleSaveToFile}
-        className="w-full bg-blue-500 text-white p-3 text-sm md:text-base lg:text-lg font-medium rounded-md mt-6 hover:bg-blue-600"
-      >
-        Save to Excel
-      </button> */}
+      
+      
     </div>
   );
 }
