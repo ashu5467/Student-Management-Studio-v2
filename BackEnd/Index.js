@@ -34,7 +34,7 @@ if (!fs.existsSync(documentsDirectory)) {
 
 
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001','http://192.168.1.7:3000'], // Allow both frontend URLs
+    origin: '*'//['http://localhost:3000', 'http://localhost:3001','http://192.168.1.7:3000'], // Allow both frontend URLs
   }));
 
 // Serve static files (e.g., images) from the specific folder
