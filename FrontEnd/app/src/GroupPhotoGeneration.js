@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
+import { useEffect } from 'react';
+
 
 const GroupPhotoGeneration = () => {
   const [imageName, setImageName] = useState('');
@@ -21,12 +23,38 @@ const GroupPhotoGeneration = () => {
   const [studentData, setStudentData] = useState([]);
   const [excelData, setExcelData] = useState([]);
   const [schoolNumber, setSchoolNumber] = useState('');
+  const [ipAddress, setIpAddress] = useState(null);
+
+
+
+
+  const fetchIpAddress = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/get-ip');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Fetched IP address:', data.ip); // Debugging line
+      setIpAddress(data.ip);
+    } catch (error) {
+      console.error('Error fetching IP address:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchIpAddress();
+  }, []);
+
+
+
+
 
   const handleSearch = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/check-image/${imageName}`);
+      const response = await axios.get(`http://${ipAddress}:5000/check-image/${imageName}`);
       if (response.data.url) {
-        setImageUrl(`http://localhost:5000${response.data.url}`);
+        setImageUrl(`http://${ipAddress}:5000${response.data.url}`);
         setError('');
         setIsPhotoVisible(true); 
       }
@@ -47,7 +75,7 @@ const GroupPhotoGeneration = () => {
    
    console.log("cameraid>>>>",cameraId)
       const response = await axios.post(
-        `http://localhost:5000/create-excel/${imageName}`,
+        `http://${ipAddress}:5000/create-excel/${imageName}`,
         {
           board: board,
           classname: classname,
@@ -110,13 +138,7 @@ const GroupPhotoGeneration = () => {
     reader.readAsBinaryString(file);
   };
 
-  // const handleGroupPhotoIdChange = (e) => {
-  //   const selectedPhotoId = e.target.value;
-  //   setSelectedGroupPhotoId(selectedPhotoId);
-  //   setImageName(selectedPhotoId);
-  //   setIsPhotoVisible(false);
-  //   searchStudentData(selectedPhotoId);
-  // };
+  
 
   const handleGroupPhotoIdChange = (e) => {
     const selectedPhotoId = e.target.value;
@@ -222,18 +244,7 @@ const GroupPhotoGeneration = () => {
         </select>
       </div>
 
-      {/* <div>
-        <label className="block mb-2">Select Group Camera ID:</label>
-        <select value={selectedGroupCameraId} onChange={(e) => setSelectedGroupCameraId(e.target.value)} className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400">
-          <option value="">Select Group Camera ID</option>
-          {groupCameraIdOptions.map((cameraId, index) => (
-            <option key={index} value={cameraId}>
-              {cameraId}
-            </option>
-          ))}
-        </select>
-      </div> */}
-
+      
 
 <div>
   <label className="block mb-2">Enter Group Camera ID:</label>
@@ -247,18 +258,7 @@ const GroupPhotoGeneration = () => {
 </div>
 
 
-      {/* <div>
-        <label className="block mb-2">Select Group Photo ID:</label>
-        <select value={selectedGroupPhotoId} onChange={handleGroupPhotoIdChange} className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl focus:outline-none focus:ring-2 focus:ring-blue-400">
-          <option value="">Select Group Photo ID</option>
-          {groupPhotoIdOptions.map((photoId, index) => (
-            <option key={index} value={photoId}>
-              {photoId}
-            </option>
-          ))}
-        </select>
-      </div> */}
-
+     
 
 <div>
   <label className="block mb-2">Enter Group Photo ID:</label>

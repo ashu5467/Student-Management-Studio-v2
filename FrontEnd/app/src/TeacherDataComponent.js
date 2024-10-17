@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
 import FileSaver from 'file-saver';
+import { useEffect } from 'react';
 
 function TeacherDataComponent() {
   const [formData, setFormData] = useState({
@@ -15,6 +16,30 @@ function TeacherDataComponent() {
   const [photoId, setPhotoId] = useState('');
   const [workbook, setWorkbook] = useState(null);
   const [fileName, setFileName] = useState('');
+  const [ipAddress, setIpAddress] = useState(null);
+
+
+
+  const fetchIpAddress = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/get-ip');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Fetched IP address:', data.ip); // Debugging line
+      setIpAddress(data.ip);
+    } catch (error) {
+      console.error('Error fetching IP address:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchIpAddress();
+  }, []);
+
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -117,69 +142,76 @@ function TeacherDataComponent() {
   };
 
 
-const handleSaveToFile = () => {
-  if (!workbook || !fileName) {
-    console.log("No workbook or file name. Exiting...");
-    return;
-  }
-
-  const sheetName = workbook.SheetNames[0];
-  const worksheet = workbook.Sheets[sheetName];
-
-  // Extract the existing data as an array of arrays (excluding headers)
-  const existingData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-
-  console.log("Existing data before update:", existingData);
-
-  // Prepare the updated data array
-  const updatedData = existingData.map((row, index) => {
-    const teacher = allTeachers.find((t) => t.teacherId === row[0]); // Find the teacher by ID
-
-    // Update only the photoId if teacher is found
-    if (teacher) {
-      return [
-        teacher.teacherId,        // Teacher ID
-        teacher.teacherName,      // Teacher Name
-        teacher.cameraId,         // Camera ID
-        teacher.photoId || '',    // Updated Photo ID, ensuring it's set or empty
-      ];
+  const handleSaveToFile = () => {
+    if (!workbook || !fileName) {
+      console.log("No workbook or file name. Exiting...");
+      return;
     }
-
-    // If teacher not found, return the original row
-    return row;
-  });
-
-  console.log("Final updated data:", updatedData);
-
-  // Create a new worksheet from the updated data
-  const newWorksheet = XLSX.utils.aoa_to_sheet(updatedData);
-
-  // Replace the old sheet with the updated one
-  workbook.Sheets[sheetName] = newWorksheet;
-
-  // Write the updated workbook
-  const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-
-  // Send the updated file to the backend
-  console.log("Sending updated data to backend...");
-  fetch(`http://localhost:3001/update/${encodeURIComponent(fileName)}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ updatedData }), // Send updatedData directly as JSON
-  })
-    .then((response) => response.text())
-    .then((result) => {
-      console.log("Response from backend:", result);
-      alert(result);
-    })
-    .catch((error) => {
-      console.error('Error updating file:', error);
+  
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+  
+    // Extract the existing data as an array of arrays (including headers)
+    const existingData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+  
+    console.log("Existing data before update:", existingData);
+  
+    // Prepare the updated data array
+    const updatedData = existingData.map((row, index) => {
+      // Skip the header row
+      // if (index === 0) {
+      //   return row; // Return headers unchanged
+      // }
+  
+      const teacherId = row[0]; // Assuming Teacher ID is in column 0
+      const teacher = allTeachers.find((t) => t.teacherId === teacherId);
+  
+      // If the teacher is found, only update the specific column for Photo ID
+      if (teacher) {
+        console.log(`Updating Photo ID for Teacher: ${teacher.teacherName} (ID: ${teacher.teacherId})`);
+        return [
+          row[0],                  // Teacher ID (original value from column 0)
+          row[1],                  // Teacher Name (original value from column 1)
+          row[2],                  // Camera ID (original value from column 2)
+          teacher.photoId || '',    // Updated Photo ID or empty if not provided (column 3)
+        ];
+      }
+  
+      // If teacher not found, return the original row unchanged
+      return row;
     });
-};
-
+  
+    console.log("Final updated data before writing to Excel:", updatedData);
+  
+    // Create a new worksheet from the updated data
+    const newWorksheet = XLSX.utils.aoa_to_sheet(updatedData);
+  
+    // Replace the old sheet with the updated one
+    workbook.Sheets[sheetName] = newWorksheet;
+  
+    // Write the updated workbook
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+  
+    // Send the updated file to the backend
+    console.log("Sending updated data to backend...");
+    fetch(`http://${ipAddress}:3001/update/${encodeURIComponent(fileName)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ updatedData }), // Send updatedData directly as JSON
+    })
+      .then((response) => response.text())
+      .then((result) => {
+        console.log("Response from backend:", result);
+        alert(result);
+      })
+      .catch((error) => {
+        console.error('Error updating file:', error);
+      });
+  };
+  
 
 
 

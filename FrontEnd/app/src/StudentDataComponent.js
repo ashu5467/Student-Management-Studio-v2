@@ -21,6 +21,32 @@ function StudentDataComponent() {
   const [fileName, setFileName] = useState('');
   const [workbook, setWorkbook] = useState(null);
   const [filteredStudents, setFilteredStudents] = useState([]);
+  const [groupPhotoId, setGroupPhotoId] = useState('');
+  const [ipAddress, setIpAddress] = useState(null);
+
+
+
+
+  const fetchIpAddress = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/get-ip');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Fetched IP address:', data.ip); // Debugging line
+      setIpAddress(data.ip);
+    } catch (error) {
+      console.error('Error fetching IP address:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchIpAddress();
+  }, []);
+  
+  
+
 
   // Handle input changes
   const handleChange = (e) => {
@@ -132,7 +158,7 @@ const handleSubmit = (e) => {
  
   // Handle adding the Individual Photo ID
 const handleAddInfo = () => {
-  if (!photoId || !selectedStudent) {
+  if ( !selectedStudent) {
     alert('Please enter the Individual Photo ID');
     return;
   }
@@ -144,17 +170,21 @@ const handleAddInfo = () => {
       return {
         ...student,
         photo: photoId,  // Update the Individual Photo ID
+        groupPhotoId: groupPhotoId || student.groupPhotoId,
       };
     }
     return student;  // Return unchanged students
   });
 
   setAllStudents(updatedStudents);
+  console.log(`New Individual Photo ID: ${photoId}`);
+  console.log(`New Group Photo ID (if any): ${groupPhotoId}`);
 
   // Update the selected student's photo while keeping other data intact
   setSelectedStudent((prevData) => ({
     ...prevData,
     photo: photoId,
+    groupPhotoId: groupPhotoId || prevData.groupPhotoId,
   }));
 
   // Update studentData with all fields intact
@@ -169,11 +199,14 @@ const handleAddInfo = () => {
     photo: photoId,
     groupCameraId: selectedStudent.groupCameraId,
     groupPhotoId: selectedStudent.groupPhotoId,
+    groupPhotoId: groupPhotoId || selectedStudent.groupPhotoId,
+
       
   }));
 
   setShowPopup(false);
   setPhotoId('');
+  setGroupPhotoId('');
 
   handleSaveToFile();
 };
@@ -195,7 +228,7 @@ const handleAddInfo = () => {
       'Group Photo ID': student.groupPhotoId,
     }));
 
-    fetch(`http://localhost:3001/update/${encodeURIComponent(fileName)}`, {
+    fetch(`http://${ipAddress}:3001/update/${encodeURIComponent(fileName)}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -357,17 +390,26 @@ const handleAddInfo = () => {
         </div>
       )}
 
-      {/* Popup for entering Individual Photo ID */}
+      
+
+      {/* Popup for entering Individual and Group Photo IDs */}
       {showPopup && (
         <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md mx-auto">
-            <h4 className="text-lg md:text-xl lg:text-2xl font-bold mb-4">Enter Individual Photo ID</h4>
+            <h4 className="text-lg md:text-xl lg:text-2xl font-bold mb-4">Enter Photo IDs</h4>
             <input
               type="text"
               value={photoId}
               onChange={(e) => setPhotoId(e.target.value)}
               className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="Enter Photo ID"
+              placeholder="Enter Individual Photo ID (Optional)"
+            />
+            <input
+              type="text"
+              value={groupPhotoId}
+              onChange={(e) => setGroupPhotoId(e.target.value)}
+              className="w-full border border-gray-300 rounded-md p-2 text-base md:text-lg lg:text-xl mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="Enter Group Photo ID (Optional)"
             />
             <div className="flex justify-end space-x-4">
               <button

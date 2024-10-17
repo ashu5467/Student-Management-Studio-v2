@@ -9,11 +9,70 @@ const cors = require('cors');
 const socketIo = require('socket.io'); // Import socket.io
 const sharp = require('sharp'); // For image manipulation
 const bodyParser = require('body-parser');
-const paths = require('./Paths'); 
+//const pathConfig = require('./Paths');
+const os = require('os');
+const path = require('path');
+
+
+
+ 
+
 
 const app = express();
 const server = http.createServer(app); // Create an HTTP server
 const io = socketIo(server); // Attach socket.io to the server
+
+
+
+
+
+const homeDirectory = os.homedir();
+
+// Define path configurations using the home directory
+const pathConfig = {
+  BASE: path.join(homeDirectory, 'Desktop'), // Base path pointing to Desktop
+  imagesDirectory: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Group_Photos'),
+  documentsDirectory: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Group_Photos', 'Group_Photo_Documents'),
+  updateDocsDirectory: path.join(homeDirectory, 'Desktop', 'student management studio docs'),
+  individualPhotosDirectory: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Individual_Photos'),
+  insidePsdPath: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Magazine', 'Templates', 'Inside_sheet.psd'),
+  outsidePsdPath: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Magazine', 'Templates', 'Outside_sheet.PSD'),
+  outputPdfPath: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Magazine', 'Templates', 'output.pdf'),
+  finalPdfDirectory: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Magazine', 'Individual_Magazines'),
+  insideModifiedPath: path.join(homeDirectory, 'Desktop', 'inside_modified.png'),
+  outsideModifiedPath: path.join(homeDirectory, 'Desktop', 'outside_modified.png'),
+  outputpdfPath: path.join(homeDirectory, 'Desktop', 'output.pdf')
+};
+
+module.exports = pathConfig;
+
+
+
+
+// Use the home directory to construct paths
+const BASE_PATH = path.join(homeDirectory, 'Desktop'); // Desktop path
+const IMAGES_DIR = path.join(BASE_PATH, 'School_Studio', 'schoolNum', 'Group_Photos');
+const GROUP_PHOTOS_DIR = path.join(BASE_PATH, 'School_Studio', 'schoolNum', 'Group Photos');
+const INDIVIDUAL_PHOTO_PATH = path.join(BASE_PATH, 'School_Studio', 'schoolNum', 'Individual_Photos');
+const INSIDE_PSD_PATH = path.join(BASE_PATH, 'School_Studio', 'Templates', 'Inside sheet.psd');
+const OUTSIDE_PSD_PATH = path.join(BASE_PATH, 'School_Studio', 'schoolNum', 'Magazine', 'Templates', 'Outside sheet.psd');
+const SAVE_PATH = path.join(BASE_PATH, 'School_Studio', 'schoolNum', 'Magazine', 'Individual_Magazines');
+const UPLOAD_PATH = path.join(BASE_PATH, 'student management studio docs');
+
+module.exports = {
+  IMAGES_DIR,
+  GROUP_PHOTOS_DIR,
+  INDIVIDUAL_PHOTO_PATH,
+  INSIDE_PSD_PATH,
+  OUTSIDE_PSD_PATH,
+  SAVE_PATH,
+  UPLOAD_PATH
+};
+
+
+
+
+
 
 const upload = multer({ dest: 'uploads/' });
 app.options('*', cors()); // Pre-flight requests for all routes
@@ -42,11 +101,14 @@ app.get('/group-photo', (req, res) => {
 app.post('/update/:fileName', upload.none(), (req, res) => {
   const fileName = req.params.fileName;
   console.log(`Received an update request for file: ${fileName}`);
+  const paths = require('./Paths'); 
 
   console.log("app.post('/update/:fileName',>>>321")
 
+  console.log('updateDocsDirectory:>>>', pathConfig.updateDocsDirectory);
+
   // Specify the path where the file should be updated
-  const filePath = path.join('/home/vishal/Desktop/student management studio docs', fileName);
+  const filePath = path.join(pathConfig.updateDocsDirectory, fileName);
   const updatedData = req.body.updatedData;
 
   //console.log('Received data for update:', updatedData);
@@ -81,6 +143,42 @@ app.post('/update/:fileName', upload.none(), (req, res) => {
     res.status(500).send('Error updating file.');
   }
 });
+
+
+
+
+function getLocalIp() {
+  const networkInterfaces = os.networkInterfaces();
+  for (const interface in networkInterfaces) {
+    for (const details of networkInterfaces[interface]) {
+      if (details.family === 'IPv4' && !details.internal) {
+        return details.address;
+      }
+    }
+  }
+  return 'localhost';  // Fallback in case IP is not found
+}
+
+app.get('/get-ip', (req, res) => {
+  const interfaces = os.networkInterfaces();
+  let ipAddress;
+
+  for (const interfaceKey in interfaces) {
+    for (const iface of interfaces[interfaceKey]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        ipAddress = iface.address;
+        break;
+      }
+    }
+    if (ipAddress) break;
+  }
+
+  res.json({ ip: ipAddress || 'No IP address found' });
+});
+
+
+
+
 
 // Start the server 
 const PORT = 3001;

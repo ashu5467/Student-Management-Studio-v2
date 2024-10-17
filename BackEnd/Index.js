@@ -10,14 +10,61 @@ const { exec } = require('child_process');
 const { PDFDocument,StandardFonts, rgb ,degrees} = require('pdf-lib');
 const XLSX = require('xlsx');
 const sharp = require('sharp');
-const pathConfig = require('./Paths');
+//const pathConfig = require('./Paths');
 const paths = require('./Paths'); 
 
-const folderNames = ['1', '2', '3', '4'];
-
+const os = require('os');
 
 const app = express();
 const PORT = 5000;
+
+
+
+const homeDirectory = os.homedir();
+
+// Define path configurations using the home directory
+const pathConfig = {
+  BASE: path.join(homeDirectory, 'Desktop'), // Base path pointing to Desktop
+  imagesDirectory: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Group_Photos'),
+  documentsDirectory: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Group_Photos', 'Group_Photo_Documents'),
+  updateDocsDirectory: path.join(homeDirectory, 'Desktop', 'student management studio docs'),
+  individualPhotosDirectory: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Individual_Photos'),
+  insidePsdPath: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Magazine', 'Templates', 'Inside_sheet.psd'),
+  outsidePsdPath: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Magazine', 'Templates', 'Outside_sheet.PSD'),
+  outputPdfPath: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Magazine', 'Templates', 'output.pdf'),
+  finalPdfDirectory: path.join(homeDirectory, 'Desktop', 'School_Studio', 'schoolNum', 'Magazine', 'Individual_Magazines'),
+  insideModifiedPath: path.join(homeDirectory, 'Desktop', 'inside_modified.png'),
+  outsideModifiedPath: path.join(homeDirectory, 'Desktop', 'outside_modified.png'),
+  outputpdfPath: path.join(homeDirectory, 'Desktop', 'output.pdf')
+};
+
+module.exports = pathConfig;
+
+
+
+
+// Use the home directory to construct paths
+const BASE_PATH = path.join(homeDirectory, 'Desktop'); // Desktop path
+const IMAGES_DIR = path.join(BASE_PATH, 'School_Studio', 'schoolNum', 'Group_Photos');
+const GROUP_PHOTOS_DIR = path.join(BASE_PATH, 'School_Studio', 'schoolNum', 'Group Photos');
+const INDIVIDUAL_PHOTO_PATH = path.join(BASE_PATH, 'School_Studio', 'schoolNum', 'Individual_Photos');
+const INSIDE_PSD_PATH = path.join(BASE_PATH, 'School_Studio', 'Templates', 'Inside sheet.psd');
+const OUTSIDE_PSD_PATH = path.join(BASE_PATH, 'School_Studio', 'schoolNum', 'Magazine', 'Templates', 'Outside sheet.psd');
+const SAVE_PATH = path.join(BASE_PATH, 'School_Studio', 'schoolNum', 'Magazine', 'Individual_Magazines');
+const UPLOAD_PATH = path.join(BASE_PATH, 'student management studio docs');
+
+module.exports = {
+  IMAGES_DIR,
+  GROUP_PHOTOS_DIR,
+  INDIVIDUAL_PHOTO_PATH,
+  INSIDE_PSD_PATH,
+  OUTSIDE_PSD_PATH,
+  SAVE_PATH,
+  UPLOAD_PATH
+};
+
+
+
 
 // Directories
 const imagesDirectory = pathConfig.imagesDirectory;
@@ -104,7 +151,7 @@ app.post('/create-excel/:imageName', async (req, res) => {
   let newImageDirectory = imagesDirectory.replace('schoolNum',schoolNumber)
   console.log('newImageDirectory>>>>>',newImageDirectory)
   for (const ext of possibleExtensions) {
-    const tempImagePath = path.join(newImageDirectory+cameraId, `${imageName}.${ext}`);
+    const tempImagePath = path.join(newImageDirectory,cameraId, `${imageName}.${ext}`);
     console.log("tampimagepath>>>>>",tempImagePath)
     if (fs.existsSync(tempImagePath)) {
       imagePath = tempImagePath;
@@ -271,7 +318,7 @@ app.post('/create-magazine', async (req, res) => {
   const outsidePsdPath = pathConfig.outsidePsdPath;
   const outputPdfPath = pathConfig.outputPdfPath;
   const finalPdfDirectory = pathConfig.finalPdfDirectory;
-  const sheetName = `1_${board}_${className}_${section}`;
+  const sheetName = `${SchoolNumber}_${board}_${className}_${section}`;
 
 
   try {
@@ -394,7 +441,7 @@ console.log(GroupPhotoPath,'>>>>')
           console.log('newOutputpdfPath391>>>',newOutputpdfPath)
 
           // Convert to PDF and insert photos
-          const convertCommand = `convert /home/vishal/Desktop/inside_modified.png /home/vishal/Desktop/outside_modified.png ${newOutputpdfPath}`;
+          const convertCommand = `convert ${pathConfig.insideModifiedPath} ${pathConfig.outsideModifiedPath} ${pathConfig.outputpdfPath}`;
           await new Promise((resolve, reject) => {
               exec(convertCommand, (err, stdout, stderr) => { 
                   if (err) {

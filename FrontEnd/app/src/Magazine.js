@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
+import { useEffect } from 'react';
+
 
 const Magazine = () => {
   // State for input fields
@@ -12,6 +14,36 @@ const Magazine = () => {
   const [excelData, setExcelData] = useState(null);
   const [error, setError] = useState('');
   const [excelCreationStatus, setExcelCreationStatus] = useState('');
+  const [ipAddress, setIpAddress] = useState('localhost');
+  const [loading, setLoading] = useState(false);
+
+
+  const fetchIpAddress = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/get-ip');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.ip !== ipAddress) {
+        console.log('Fetched IP address:', data.ip); // Debugging line
+        setIpAddress(data.ip);
+      }
+    } catch (error) {
+      console.error('Error fetching IP address:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchIpAddress(); // Run once on component mount
+    const intervalId = setInterval(fetchIpAddress, 1000); // Check for changes every second
+
+    return () => clearInterval(intervalId); // Cleanup interval on unmount
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+
+
+
 
   // File upload handler
   const handleFileUpload = (e) => {
@@ -46,17 +78,18 @@ const Magazine = () => {
       return;
     }
 
+
+    setLoading(true);
+
     try {
       // Loop over each student in the selected sheet and create the magazine
       for (const student of jsonData) {
-        const response = await axios.post('http://localhost:5000/create-magazine', {
+        const response = await axios.post(`http://${ipAddress}:5000/create-magazine`, {
           // name: student.Name,
           board: selectedBoard,
           className: selectedClass,
           section: selectedSection,
           SchoolNumber:selectedSchool,
-          // individualPhotoId: student['Individual Photo ID'],
-          //groupPhotoId: student['Group Photo ID']
           groupPhotoId: "Picture 1",
         });
 
@@ -69,6 +102,8 @@ const Magazine = () => {
       setExcelCreationStatus("Magazine PDF created successfully for all students!");
     } catch (err) {
       setError("Error creating magazine: " + err.message);
+    }finally {
+      setLoading(false); // Stop loading when done
     }
   };
 
@@ -77,6 +112,8 @@ const Magazine = () => {
       <h2 className="text-2xl font-bold mb-4 text-center">Create Magazine Of Individual Students</h2>
 
       {error && <p className="text-red-500">{error}</p>}
+
+      {loading && <p className="text-yellow-600">Please wait, magazines are being created...</p>}
 
       {excelCreationStatus && (
         <p className="text-blue-600" dangerouslySetInnerHTML={{ __html: excelCreationStatus }}></p>
