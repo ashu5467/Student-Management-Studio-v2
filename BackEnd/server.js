@@ -11,7 +11,7 @@ const sharp = require('sharp'); // For image manipulation
 const bodyParser = require('body-parser');
 //const pathConfig = require('./Paths');
 const os = require('os');
-const path = require('path');
+
 
 
 
